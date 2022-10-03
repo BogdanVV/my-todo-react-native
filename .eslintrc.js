@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  extends: '@react-native-community',
+  extends: ['@react-native-community', 'react-hooks'],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   overrides: [
@@ -13,4 +13,8 @@ module.exports = {
       },
     },
   ],
-};
+  rules: {
+    semi: ['error', 'never'],
+    'react-hooks/exhaustive-deps': 'off',
+  },
+}

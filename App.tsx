@@ -1,9 +1,12 @@
 import React from 'react'
 import { BottomNavBar } from './src/components/BottomNavBar'
+import { GlobalContextProvider } from './src/context/GlobalState'
 
 const App = () => {
   return (
-    <BottomNavBar />
+    <GlobalContextProvider>
+      <BottomNavBar />
+    </GlobalContextProvider>
   )
 }
 

@@ -1,91 +1,79 @@
 import React, { PropsWithChildren, useState } from 'react'
-import { FlatList, Text, View } from 'react-native'
-import { CurrentTodo } from '../../components/CurrentTodo'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { TodoItem } from '../../components/TodoItem'
 import { EditTodoModal } from '../../components'
 import { ITodo } from '../../types/ITodo'
-import { TodoList, Wrapper } from './styled'
+import {
+  AddButton,
+  EmptyListMessage,
+  ListFooterComponent,
+  ListHeader,
+  ListItemSeparator,
+  ListTitle,
+  TodoList,
+  Wrapper,
+} from './styled'
+import Icon from 'react-native-vector-icons/Ionicons'
+import { useGlobalContext } from '../../context/GlobalState'
 
 interface IHomeScreenProps {}
 
 export const CurrentTodosScreen: React.FC<PropsWithChildren<IHomeScreenProps>> = ({}) => {
-  const [mockTodos, setMockTodos] = useState<ITodo[]>([
-    {
-      id: 1,
-      isCompleted: false,
-      title: 'Do some stuff 1'
-    },
-    {
-      id: 2,
-      isCompleted: true,
-      title: 'Do some stuff 2'
-    },
-    {
-      id: 3,
-      isCompleted: true,
-      title: 'Do some stuff 3'
-    },
-    {
-      id: 4,
-      isCompleted: false,
-      title: 'Do some stuff 4'
-    },
-    {
-      id: 5,
-      isCompleted: false,
-      title: 'Do some stuff 5'
-    },
-    {
-      id: 6,
-      isCompleted: true,
-      title: 'Do some stuff 6'
-    },
-    {
-      id: 7,
-      isCompleted: true,
-      title: 'Do some stuff 7'
-    },
-    {
-      id: 8,
-      isCompleted: false,
-      title: 'Do some stuff 8'
-    },
-    {
-      id: 9,
-      isCompleted: false,
-      title: 'Do some stuff 9'
-    },
-    {
-      id: 10,
-      isCompleted: true,
-      title: 'Do some stuff 10'
-    },
-    {
-      id: 11,
-      isCompleted: true,
-      title: 'Do some stuff 11'
-    },
-    {
-      id: 12,
-      isCompleted: false,
-      title: 'Do some stuff 12'
-    },
-  ])
-  const [isEditModal, setIsEditModal] = useState<boolean>(true)
+  const [isEditModal, setIsEditModal] = useState<boolean>(false)
+  const { getTodos, todos, deleteTodo, updateTodo, selectedTodoId, setSelectedTodoId, createTodo } = useGlobalContext()
 
-  const removeTodo: (id: number | string) => void = (id: number | string) => {
-    setMockTodos(prevState => prevState.filter(todo => todo.id !== id))
+  const toggleModal = (id: string | number | null) => {
+    setSelectedTodoId(id)
+    setIsEditModal(prevState => !prevState)
+  }
+
+  const markTodoDone = (id: string | number) => {
+    updateTodo({ id, isCompleted: true })
+  }
+
+  const handleFormSubmit = (todo: Partial<ITodo>) => {
+    if (selectedTodoId) {
+      updateTodo(todo)
+    } else {
+      createTodo(todo)
+    }
+
+    toggleModal(null)
   }
 
   return (
-    <Wrapper>
-      <TodoList
-        data={mockTodos}
-        renderItem={({ item }: { item: ITodo }) => (
-          <CurrentTodo removeTodo={removeTodo} todo={item} />
-        )}
-      />
-
-      <EditTodoModal isVisible={isEditModal} />
-    </Wrapper>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Wrapper>
+        <TodoList
+          refreshing={false}
+          onRefresh={getTodos}
+          data={todos.filter(todo => !todo.isCompleted)}
+          renderItem={({ item }: { item: ITodo }) => (
+            <TodoItem
+              onItemSelect={() => toggleModal(item.id)}
+              removeTodo={deleteTodo}
+              todo={item}
+              markTodoDone={markTodoDone}
+            />
+          )}
+          ItemSeparatorComponent={ListItemSeparator}
+          ListHeaderComponent={
+            <ListHeader>
+              <ListTitle>Current Todos</ListTitle>
+              <AddButton onPress={() => toggleModal(null)}>
+                <Icon name="add" color="#fff" size={30} />
+              </AddButton>
+            </ListHeader>
+          }
+          ListEmptyComponent={<EmptyListMessage>No todos yet</EmptyListMessage>}
+        />
+        <EditTodoModal
+          selectedTodo={todos.find(t => t.id === selectedTodoId)}
+          toggleModal={() => toggleModal(null)}
+          isVisible={isEditModal}
+          handleFormSubmit={handleFormSubmit}
+        />
+      </Wrapper>
+    </SafeAreaView>
   )
 }

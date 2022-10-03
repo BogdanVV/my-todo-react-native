@@ -1,6 +1,3 @@
-export { AddTodoButton } from './AddTodoButton'
 export { BottomNavBar } from './BottomNavBar'
-export { CurrentTodo } from './CurrentTodo'
-export { CustomBottomTab } from './CustomBottomTab'
-export { CustomTabButton } from './CustomTabButton'
+export { TodoItem } from './TodoItem'
 export { EditTodoModal } from './EditTodoModal'
